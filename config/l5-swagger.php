@@ -48,6 +48,11 @@ return [
                 'annotations' => [
                     base_path('app'),
                 ],
+
+                /*
+                 * OpenAPI specification version
+                 */
+                'openapi' => '3.0.0',
             ],
         ],
     ],
