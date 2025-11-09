@@ -101,9 +101,9 @@ class AuthController extends Controller
             return response()->json($payload);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Invalid key supplied',
+                'message' => $e->getMessage(),
                 'status' => 'error'
-            ], 500);
+            ], 401);
         }
 
     }
