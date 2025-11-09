@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Hash;
  * )
  *
  * @OA\Server(
- *     url="https://api-laravel-9z13.onrender.com",
+ *     url="https://api-laravel-ym60.onrender.com",
  *     description="Serveur de production"
  * )
  * @OA\Server(
