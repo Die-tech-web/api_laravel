@@ -37,7 +37,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "chasity19@example.org"
+                                        "example": "admin@example.com"
                                     },
                                     "password": {
                                         "type": "string",
