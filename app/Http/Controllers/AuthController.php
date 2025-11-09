@@ -36,6 +36,11 @@ use Illuminate\Support\Facades\Hash;
  *     description="Gestion des transactions"
  * )
  *
+ * @OA\PathItem(path="/api/login")
+ * @OA\PathItem(path="/api/comptes")
+ * @OA\PathItem(path="/api/transactions")
+ * @OA\PathItem(path="/api/transactions/{transaction}")
+ *
  * @OA\SecurityScheme(
  *     securityScheme="sanctum",
  *     type="apiKey",

@@ -20,7 +20,7 @@ WORKDIR /var/www/html
 COPY --from=composer-build /app /var/www/html
 
 RUN mkdir -p storage/framework/{cache,data,sessions,testing,views} \
-    && mkdir -p storage/logs bootstrap/cache \
+    && mkdir -p storage/logs bootstrap/cache storage/api-docs \
     && chown -R laravel:laravel /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
@@ -28,4 +28,4 @@ USER laravel
 
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "php artisan l5-swagger:generate && php artisan serve --host=0.0.0.0 --port=8000"]
