@@ -6,6 +6,8 @@ return [
         'default' => [
             'api' => [
                 'title' => 'Banque API Documentation',
+                'description' => 'API pour la gestion bancaire - Comptes, Transactions, Authentification',
+                'version' => '1.0.0',
             ],
 
             'routes' => [
