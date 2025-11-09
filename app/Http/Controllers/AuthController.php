@@ -97,10 +97,13 @@ class AuthController extends Controller
     {
         try
         {
-            $playload = $this->authService->loginService($request);
-            return response()->json($playload);
-        } catch (\Error $error) {
-            return response()->json($error);
+            $payload = $this->authService->loginService($request);
+            return response()->json($payload);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Invalid key supplied',
+                'status' => 'error'
+            ], 500);
         }
 
     }

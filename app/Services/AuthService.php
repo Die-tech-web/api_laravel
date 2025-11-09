@@ -12,15 +12,14 @@ class AuthService
    public function loginService(LoginRequest $request)
    {
         $validatedData = $request->validated();
-        
+
         $user = User::where('email', $validatedData["email"])->first();
-     
-       
-        if(!$user || !Hash::check($validatedData['password'],$user->password))
-        {  
+
+        if(!$user || !Hash::check($validatedData['password'], $user->password))
+        {
              throw new \Exception('Email ou mot de passe incorrect', 401);
         }
-       
+
         $token = $user->createToken('access token')->accessToken;
 
          return [
@@ -28,12 +27,11 @@ class AuthService
                 'id' => $user->id,
                 'titulaire' => $user->titulaire,
                 'email' => $user->email,
-                'role' => $user->role, 
+                'role' => $user->role,
             ],
             'token' => $token,
             'token_type' => 'Bearer',
         ];
-   
-   }
 
+   }
 }
