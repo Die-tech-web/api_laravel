@@ -11,6 +11,19 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Schema(
+ *     schema="Compte",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer"),
+ *     @OA\Property(property="num_compte", type="string"),
+ *     @OA\Property(property="type_compte", type="string", enum={"courant", "epargne"}),
+ *     @OA\Property(property="solde", type="number"),
+ *     @OA\Property(property="devise", type="string"),
+ *     @OA\Property(property="status", type="string", enum={"actif", "inactif"})
+ * )
+ */
+
 class CompteController extends Controller
 {
 
@@ -23,7 +36,61 @@ class CompteController extends Controller
     }
 
     /**
-     * Afficher la liste des comptes (avec filtres)
+     * @OA\Get(
+     *     path="/api/comptes",
+     *     tags={"Comptes"},
+     *     summary="Lister les comptes",
+     *     description="Récupérer la liste des comptes avec filtres optionnels",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         @OA\Schema(type="string", enum={"actif", "inactif"}),
+     *         description="Filtrer par statut du compte"
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         @OA\Schema(type="string"),
+     *         description="Filtrer par type de compte"
+     *     ),
+     *     @OA\Parameter(
+     *         name="solde_min",
+     *         in="query",
+     *         @OA\Schema(type="number"),
+     *         description="Solde minimum"
+     *     ),
+     *     @OA\Parameter(
+     *         name="solde_max",
+     *         in="query",
+     *         @OA\Schema(type="number"),
+     *         description="Solde maximum"
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         @OA\Schema(type="integer", default=1),
+     *         description="Numéro de page"
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         @OA\Schema(type="integer", default=10),
+     *         description="Nombre d'éléments par page"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des comptes récupérée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Compte"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé"
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -127,6 +194,43 @@ class CompteController extends Controller
     // }
 
 
+    /**
+     * @OA\Post(
+     *     path="/api/comptes",
+     *     tags={"Comptes"},
+     *     summary="Créer un nouveau compte",
+     *     description="Créer un nouveau compte bancaire",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"client_id","type_compte","devise"},
+     *             @OA\Property(property="client_id", type="integer", description="ID du client"),
+     *             @OA\Property(property="type_compte", type="string", enum={"courant", "epargne"}, description="Type de compte"),
+     *             @OA\Property(property="devise", type="string", default="XAF", description="Devise du compte")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Compte créé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="compte", ref="#/components/schemas/Compte"),
+     *             @OA\Property(property="client", type="object"),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Données invalides"
+     *     )
+     * )
+     */
     public function store(StoreCompteRequest $request)
     {
         try {

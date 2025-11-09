@@ -10,6 +10,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Schema(
+ *     schema="Transaction",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer"),
+ *     @OA\Property(property="numero_transaction", type="string"),
+ *     @OA\Property(property="compte_id", type="integer"),
+ *     @OA\Property(property="type", type="string", enum={"depot", "retrait", "virement"}),
+ *     @OA\Property(property="montant", type="number"),
+ *     @OA\Property(property="description", type="string"),
+ *     @OA\Property(property="statut", type="string", enum={"en_attente", "validee", "annulee"}),
+ *     @OA\Property(property="date_creation", type="string", format="date-time")
+ * )
+ */
+
 class TransactionController extends Controller
 {
     private TransactionService $transactionService;
@@ -20,7 +35,42 @@ class TransactionController extends Controller
     }
 
     /**
-     * Créer une nouvelle transaction
+     * @OA\Post(
+     *     path="/api/transactions",
+     *     tags={"Transactions"},
+     *     summary="Créer une nouvelle transaction",
+     *     description="Créer une nouvelle transaction bancaire",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"compte_id","type","montant","description"},
+     *             @OA\Property(property="compte_id", type="integer", description="ID du compte"),
+     *             @OA\Property(property="type", type="string", enum={"depot", "retrait", "virement"}, description="Type de transaction"),
+     *             @OA\Property(property="montant", type="number", description="Montant de la transaction"),
+     *             @OA\Property(property="description", type="string", description="Description de la transaction")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Transaction créée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="transaction", ref="#/components/schemas/Transaction")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Données invalides"
+     *     )
+     * )
      */
     public function store(StoreTransactionRequest $request): JsonResponse
     {
@@ -66,7 +116,55 @@ class TransactionController extends Controller
     }
 
     /**
-     * Afficher la liste des transactions
+     * @OA\Get(
+     *     path="/api/transactions",
+     *     tags={"Transactions"},
+     *     summary="Lister les transactions",
+     *     description="Récupérer la liste des transactions avec filtres optionnels",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="compte_id",
+     *         in="query",
+     *         @OA\Schema(type="integer"),
+     *         description="Filtrer par ID de compte"
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         @OA\Schema(type="string", enum={"depot", "retrait", "virement"}),
+     *         description="Filtrer par type de transaction"
+     *     ),
+     *     @OA\Parameter(
+     *         name="statut",
+     *         in="query",
+     *         @OA\Schema(type="string", enum={"en_attente", "validee", "annulee"}),
+     *         description="Filtrer par statut"
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         @OA\Schema(type="integer", default=1),
+     *         description="Numéro de page"
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         @OA\Schema(type="integer", default=10),
+     *         description="Nombre d'éléments par page"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des transactions récupérée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Transaction"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé"
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -101,7 +199,36 @@ class TransactionController extends Controller
     }
 
     /**
-     * Afficher une transaction spécifique
+     * @OA\Get(
+     *     path="/api/transactions/{transaction}",
+     *     tags={"Transactions"},
+     *     summary="Afficher une transaction",
+     *     description="Récupérer les détails d'une transaction spécifique",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="transaction",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID de la transaction"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails de la transaction",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Transaction")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Transaction non trouvée"
+     *     )
+     * )
      */
     public function show(Transaction $transaction): JsonResponse
     {

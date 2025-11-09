@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: Banque API Documentation
+  description: API pour la gestion bancaire - Comptes, Transactions, Authentification
+  version: 1.0.0
+servers:
+  - url: https://api-laravel-9z13.onrender.com
+    description: Serveur de production
+tags:
+  - name: Authentification
+    description: Endpoints d'authentification
+  - name: Comptes
+    description: Gestion des comptes bancaires
+  - name: Transactions
+    description: Gestion des transactions
+security:
+  - sanctum: []
+paths:
+  /api/login:
+    post:
+      tags:
+        - Authentification
+      summary: Connexion utilisateur
+      description: Authentifier un utilisateur et obtenir un token d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: chasity19@example.org
+                password:
+                  type: string
+                  example: password
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+        '401':
+          description: Identifiants invalides
+  /api/comptes:
+    get:
+      tags:
+        - Comptes
+      summary: Lister les comptes
+      description: Récupérer la liste des comptes avec filtres optionnels
+      security:
+        - sanctum: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [actif, inactif]
+          description: Filtrer par statut du compte
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filtrer par type de compte
+        - name: solde_min
+          in: query
+          schema:
+            type: number
+          description: Solde minimum
+        - name: solde_max
+          in: query
+          schema:
+            type: number
+          description: Solde maximum
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Numéro de page
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Nombre d'éléments par page
+      responses:
+        '200':
+          description: Liste des comptes récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '403':
+          description: Accès non autorisé
+    post:
+      tags:
+        - Comptes
+      summary: Créer un nouveau compte
+      description: Créer un nouveau compte bancaire
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - client_id
+                - type_compte
+                - devise
+              properties:
+                client_id:
+                  type: integer
+                  description: ID du client
+                type_compte:
+                  type: string
+                  enum: [courant, epargne]
+                  description: Type de compte
+                devise:
+                  type: string
+                  default: XAF
+                  description: Devise du compte
+      responses:
+        '201':
+          description: Compte créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  compte:
+                    type: object
+        '403':
+          description: Accès non autorisé
+        '422':
+          description: Données invalides
+  /api/transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Lister les transactions
+      description: Récupérer la liste des transactions avec filtres optionnels
+      security:
+        - sanctum: []
+      parameters:
+        - name: compte_id
+          in: query
+          schema:
+            type: integer
+          description: Filtrer par ID de compte
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [depot, retrait, virement]
+          description: Filtrer par type de transaction
+        - name: statut
+          in: query
+          schema:
+            type: string
+            enum: [en_attente, validee, annulee]
+          description: Filtrer par statut
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Numéro de page
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Nombre d'éléments par page
+      responses:
+        '200':
+          description: Liste des transactions récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '403':
+          description: Accès non autorisé
+    post:
+      tags:
+        - Transactions
+      summary: Créer une nouvelle transaction
+      description: Créer une nouvelle transaction bancaire
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - compte_id
+                - type
+                - montant
+                - description
+              properties:
+                compte_id:
+                  type: integer
+                  description: ID du compte
+                type:
+                  type: string
+                  enum: [depot, retrait, virement]
+                  description: Type de transaction
+                montant:
+                  type: number
+                  description: Montant de la transaction
+                description:
+                  type: string
+                  description: Description de la transaction
+      responses:
+        '201':
+          description: Transaction créée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      transaction:
+                        type: object
+        '403':
+          description: Accès non autorisé
+        '422':
+          description: Données invalides
+  /api/transactions/{transaction}:
+    get:
+      tags:
+        - Transactions
+      summary: Afficher une transaction
+      description: Récupérer les détails d'une transaction spécifique
+      security:
+        - sanctum: []
+      parameters:
+        - name: transaction
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la transaction
+      responses:
+        '200':
+          description: Détails de la transaction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+        '403':
+          description: Accès non autorisé
+        '404':
+          description: Transaction non trouvée
+components:
+  securitySchemes:
+    sanctum:
+      type: apiKey
+      description: Enter token in format (Bearer <token>)
+      name: Authorization
+      in: header

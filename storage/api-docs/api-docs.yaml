@@ -1,0 +1,405 @@
+openapi: 3.0.0
+info:
+  title: 'Banque API Documentation'
+  description: 'API pour la gestion bancaire - Comptes, Transactions, Authentification'
+  version: 1.0.0
+servers:
+  -
+    url: 'https://api-laravel-9z13.onrender.com'
+    description: 'Serveur de production'
+paths:
+  /api/login:
+    post:
+      tags:
+        - Authentification
+      summary: 'Connexion utilisateur'
+      description: "Authentifier un utilisateur et obtenir un token d'accès"
+      operationId: a3b306d14572d1f4bd6c064b3233e7b8
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: chasity19@example.org
+                password:
+                  type: string
+                  example: password
+              type: object
+      responses:
+        200:
+          description: 'Connexion réussie'
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+                type: object
+        401:
+          description: 'Identifiants invalides'
+  /api/comptes:
+    get:
+      tags:
+        - Comptes
+      summary: 'Lister les comptes'
+      description: 'Récupérer la liste des comptes avec filtres optionnels'
+      operationId: 4059c2a0b4cce9e57227146f5b16138d
+      parameters:
+        -
+          name: status
+          in: query
+          description: 'Filtrer par statut du compte'
+          schema:
+            type: string
+            enum:
+              - actif
+              - inactif
+        -
+          name: type
+          in: query
+          description: 'Filtrer par type de compte'
+          schema:
+            type: string
+        -
+          name: solde_min
+          in: query
+          description: 'Solde minimum'
+          schema:
+            type: number
+        -
+          name: solde_max
+          in: query
+          description: 'Solde maximum'
+          schema:
+            type: number
+        -
+          name: page
+          in: query
+          description: 'Numéro de page'
+          schema:
+            type: integer
+            default: 1
+        -
+          name: limit
+          in: query
+          description: "Nombre d'éléments par page"
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: 'Liste des comptes récupérée avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Compte'
+                type: object
+        403:
+          description: 'Accès non autorisé'
+      security:
+        -
+          sanctum: []
+    post:
+      tags:
+        - Comptes
+      summary: 'Créer un nouveau compte'
+      description: 'Créer un nouveau compte bancaire'
+      operationId: d46221922144c672a4a500c7f3755629
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - client_id
+                - type_compte
+                - devise
+              properties:
+                client_id:
+                  description: 'ID du client'
+                  type: integer
+                type_compte:
+                  description: 'Type de compte'
+                  type: string
+                  enum:
+                    - courant
+                    - epargne
+                devise:
+                  description: 'Devise du compte'
+                  type: string
+                  default: XAF
+              type: object
+      responses:
+        201:
+          description: 'Compte créé avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  compte:
+                    $ref: '#/components/schemas/Compte'
+                  client:
+                    type: object
+                  user:
+                    type: object
+                type: object
+        403:
+          description: 'Accès non autorisé'
+        422:
+          description: 'Données invalides'
+      security:
+        -
+          sanctum: []
+  /api/transactions:
+    get:
+      tags:
+        - Transactions
+      summary: 'Lister les transactions'
+      description: 'Récupérer la liste des transactions avec filtres optionnels'
+      operationId: 6581469356772e7a74a0d79897544f1a
+      parameters:
+        -
+          name: compte_id
+          in: query
+          description: 'Filtrer par ID de compte'
+          schema:
+            type: integer
+        -
+          name: type
+          in: query
+          description: 'Filtrer par type de transaction'
+          schema:
+            type: string
+            enum:
+              - depot
+              - retrait
+              - virement
+        -
+          name: statut
+          in: query
+          description: 'Filtrer par statut'
+          schema:
+            type: string
+            enum:
+              - en_attente
+              - validee
+              - annulee
+        -
+          name: page
+          in: query
+          description: 'Numéro de page'
+          schema:
+            type: integer
+            default: 1
+        -
+          name: limit
+          in: query
+          description: "Nombre d'éléments par page"
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: 'Liste des transactions récupérée avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                type: object
+        403:
+          description: 'Accès non autorisé'
+      security:
+        -
+          sanctum: []
+    post:
+      tags:
+        - Transactions
+      summary: 'Créer une nouvelle transaction'
+      description: 'Créer une nouvelle transaction bancaire'
+      operationId: ab765dced58cfe2f620929db31452145
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - compte_id
+                - type
+                - montant
+                - description
+              properties:
+                compte_id:
+                  description: 'ID du compte'
+                  type: integer
+                type:
+                  description: 'Type de transaction'
+                  type: string
+                  enum:
+                    - depot
+                    - retrait
+                    - virement
+                montant:
+                  description: 'Montant de la transaction'
+                  type: number
+                description:
+                  description: 'Description de la transaction'
+                  type: string
+              type: object
+      responses:
+        201:
+          description: 'Transaction créée avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    properties:
+                      transaction:
+                        $ref: '#/components/schemas/Transaction'
+                    type: object
+                type: object
+        403:
+          description: 'Accès non autorisé'
+        422:
+          description: 'Données invalides'
+      security:
+        -
+          sanctum: []
+  '/api/transactions/{transaction}':
+    get:
+      tags:
+        - Transactions
+      summary: 'Afficher une transaction'
+      description: "Récupérer les détails d'une transaction spécifique"
+      operationId: 05e2714a413c88baa08631aea0c3bb87
+      parameters:
+        -
+          name: transaction
+          in: path
+          description: 'ID de la transaction'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Détails de la transaction'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+                type: object
+        403:
+          description: 'Accès non autorisé'
+        404:
+          description: 'Transaction non trouvée'
+      security:
+        -
+          sanctum: []
+components:
+  schemas:
+    Compte:
+      properties:
+        id:
+          type: integer
+        num_compte:
+          type: string
+        type_compte:
+          type: string
+          enum:
+            - courant
+            - epargne
+        solde:
+          type: number
+        devise:
+          type: string
+        status:
+          type: string
+          enum:
+            - actif
+            - inactif
+      type: object
+    Transaction:
+      properties:
+        id:
+          type: integer
+        numero_transaction:
+          type: string
+        compte_id:
+          type: integer
+        type:
+          type: string
+          enum:
+            - depot
+            - retrait
+            - virement
+        montant:
+          type: number
+        description:
+          type: string
+        statut:
+          type: string
+          enum:
+            - en_attente
+            - validee
+            - annulee
+        date_creation:
+          type: string
+          format: date-time
+      type: object
+  securitySchemes:
+    sanctum:
+      type: apiKey
+      description: 'Enter token in format (Bearer <token>)'
+      name: Authorization
+      in: header
+tags:
+  -
+    name: Authentification
+    description: "Endpoints d'authentification"
+  -
+    name: Comptes
+    description: 'Gestion des comptes bancaires'
+  -
+    name: Transactions
+    description: 'Gestion des transactions'
+security:
+  -
+    sanctum: []
