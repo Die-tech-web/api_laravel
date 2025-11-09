@@ -23,6 +23,24 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
+        $this->renderable(function (\Exception $e, $request) {
+            if ($request->is('api/*')) {
+                $statusCode = 500; // Default to 500
+                if ($e instanceof \Illuminate\Auth\Access\AuthorizationException) {
+                    $statusCode = 403;
+                } elseif ($e instanceof \Illuminate\Validation\ValidationException) {
+                    $statusCode = 422;
+                } elseif ($e->getCode() == 401) {
+                    $statusCode = 401;
+                }
+
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'Une erreur est survenue',
+                    'status' => 'error'
+                ], $statusCode);
+            }
+        });
+
         $this->reportable(function (Throwable $e) {
             //
         });
