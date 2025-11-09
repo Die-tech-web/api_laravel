@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompteController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:api'])->group(function () {
 Route::post('/comptes', [ CompteController::class ,'store' ]);
 Route::get('/comptes', [CompteController::class, 'index']);
+
+// Transaction routes
+Route::post('/transactions', [TransactionController::class, 'store']);
+Route::get('/transactions', [TransactionController::class, 'index']);
+Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
 
 });

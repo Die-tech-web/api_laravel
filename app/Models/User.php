@@ -63,11 +63,16 @@ class User extends Authenticatable
         if($this->client)
         {
             return 'client';
-            
+
         }else if($this->admin)
         {
             return 'admin';
         }
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
     }
 
 

@@ -12,6 +12,11 @@ abstract class BaseRepository implements BaseRepositoryInterface
 {
     protected Model $model;
 
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
     public function all(array $filters = [], int $page = 1, int $limit = 10): LengthAwarePaginator
     {
         $query = $this->model->newQuery();

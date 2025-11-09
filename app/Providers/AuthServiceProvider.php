@@ -5,7 +5,9 @@ namespace App\Providers;
 // use Illuminate\Support\Facades\Gate;
 
 use App\Models\Compte;
+use App\Models\Transaction;
 use App\Policies\ComptePolicy;
+use App\Policies\TransactionPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -17,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Compte::class => ComptePolicy::class,
+        Transaction::class => TransactionPolicy::class,
     ];
 
     /**
