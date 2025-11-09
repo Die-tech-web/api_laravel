@@ -25,6 +25,7 @@ class User extends Authenticatable
         'titulaire',
         'email',
         'password',
+        'role',
     ];
    
 
@@ -60,6 +61,12 @@ class User extends Authenticatable
 
     public function getRoleAttribute()
     {
+        // Vérifier d'abord si le rôle est défini directement dans la base de données
+        if (!empty($this->attributes['role'])) {
+            return $this->attributes['role'];
+        }
+
+        // Sinon, déterminer le rôle basé sur les relations
         if($this->client)
         {
             return 'client';
@@ -68,6 +75,8 @@ class User extends Authenticatable
         {
             return 'admin';
         }
+
+        return null;
     }
 
     public function hasRole(string $role): bool
