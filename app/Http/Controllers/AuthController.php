@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\Hash;
  *     url="https://api-laravel-9z13.onrender.com",
  *     description="Serveur de production"
  * )
+ * @OA\Server(
+ *     url="http://localhost:8000",
+ *     description="Serveur de développement local"
+ * )
  *
  * @OA\Tag(
  *     name="Authentification",
