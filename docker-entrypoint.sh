@@ -10,5 +10,13 @@ done
 echo "Database is up - executing migrations"
 php artisan migrate --force
 
+echo "Checking Passport keys..."
+if [ ! -f storage/oauth-private.key ] || [ ! -f storage/oauth-public.key ]; then
+    echo "Generating Passport keys..."
+    php artisan passport:keys
+else
+    echo "Passport keys already exist."
+fi
+
 echo "Starting Laravel application..."
 exec "$@"

@@ -20,7 +20,13 @@ class AuthService
              throw new \Exception('Email ou mot de passe incorrect', 401);
         }
 
-        $token = $user->createToken('access token')->accessToken;
+        // Créer un token avec Passport
+        try {
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+        } catch (\Exception $tokenException) {
+            throw new \Exception('Erreur lors de la création du token: ' . $tokenException->getMessage(), 500);
+        }
 
          return [
             'data' => [

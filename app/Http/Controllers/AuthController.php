@@ -100,9 +100,11 @@ class AuthController extends Controller
             $payload = $this->authService->loginService($request);
             return response()->json($payload);
         } catch (\Exception $e) {
+            \Log::error('Login error: ' . $e->getMessage());
             return response()->json([
-                'message' => $e->getMessage(),
-                'status' => 'error'
+                'message' => 'Erreur d\'authentification',
+                'status' => 'error',
+                'debug' => config('app.debug') ? $e->getMessage() : null
             ], 401);
         }
 
